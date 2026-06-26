@@ -1,0 +1,4 @@
+# TeX build files
+docs/*.aux
+docs/*.log
+
