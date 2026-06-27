@@ -3,6 +3,62 @@ import os
 from typing import Optional
 
 class DBConnection:
+    """
+    Manages SQLite database connection, schema initialization, and data seeding.
+    
+    Provides a high-level interface for database operations including:
+    - Automatic schema creation from SQL files
+    - Sample data insertion from files or raw SQL strings
+    - Connection management with foreign key enforcement
+    - Database reset capabilities for development
+    
+    Attributes:
+        db_path (str): Path to the SQLite database file
+        schema_path (str): Path to the schema SQL file
+    
+    Examples:
+        >>> # Basic initialization with default paths
+        >>> db = DBConnection()
+        
+        >>> # Custom database and schema paths
+        >>> db = DBConnection(
+        ...     db_path="./database/festival.db",
+        ...     schema_path="./database/schema.sql"
+        ... )
+        
+        >>> # Load sample data from file
+        >>> db.feed_sample(seed_path="./database/seed.sql")
+        
+        >>> # Load sample data from string
+        >>> seed_sql = '''
+        ... INSERT INTO category (name) VALUES
+        ... ('Best Picture'),
+        ... ('Best Director');
+        ... '''
+        >>> db.feed_sample(seed=seed_sql)
+        
+        >>> # Execute a query
+        >>> results = db.execute_query(
+        ...     "SELECT * FROM film WHERE year = ?", 
+        ...     (2025,)
+        ... )
+        
+        >>> # Get raw connection for complex operations
+        >>> conn = db.get_connection()
+        >>> cursor = conn.cursor()
+        >>> cursor.execute("SELECT COUNT(*) FROM person")
+        >>> cursor.close()
+        >>> conn.close()
+        
+        >>> # Reset database during development
+        >>> db.reset_database()
+        
+        >>> # Disable auto-initialization for manual control
+        >>> db = DBConnection(auto_init=False)
+        >>> # ... do something else ...
+        >>> db._init_schema()
+    """
+    
     def __init__(self, db_path: str = "./festival.db", schema_path: str = "./schema.sql", auto_init: bool = True):
         """
         Initialize database connection.
