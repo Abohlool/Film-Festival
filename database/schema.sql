@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `person` (
 CREATE TABLE IF NOT EXISTS `staff` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `name` TEXT NOT NULL,
-    `type` TEXT NOT NULL CHECK(`type` IN ('judge', 'coordinator'))
+    `type` TEXT NOT NULL CHECK(`type` IN ('judge', 'coordinator')),
     `specialization` TEXT,
     CHECK (
         (`type` = 'judge')
@@ -125,5 +125,21 @@ CREATE TABLE IF NOT EXISTS `evaluation` (
         ON DELETE CASCADE,
 
     FOREIGN KEY(`film_id`) REFERENCES `film`(`id`)
+        ON DELETE CASCADE
+);
+
+-- Festival-Film (N:M)
+CREATE TABLE IF NOT EXISTS `festival_film` (
+    `festival_id` INTEGER NOT NULL,
+    `film_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`festival_id`, `film_id`),
+
+    FOREIGN KEY (`festival_id`)
+        REFERENCES `festival`(`id`)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (`film_id`)
+        REFERENCES `film`(`id`)
         ON DELETE CASCADE
 );
