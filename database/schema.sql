@@ -27,6 +27,12 @@ CREATE TABLE IF NOT EXISTS `staff` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `name` TEXT NOT NULL,
     `type` TEXT NOT NULL CHECK(`type` IN ('judge', 'coordinator'))
+    `specialization` TEXT,
+    CHECK (
+        (`type` = 'judge')
+        OR
+        (`type` = 'coordinator' AND `specialization` IS NULL)
+    )
 );
 
 -- Film (1:N)
