@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `screening` (
     `capacity` INTEGER CHECK(`capacity` >= 0),
 
     `film_id` INTEGER NOT NULL,
-    `coordinator_id` INTEGER NOT NULL UNIQUE,
+    `coordinator_id` INTEGER NOT NULL,
 
     FOREIGN KEY(`film_id`) REFERENCES `film`(`id`)
         ON DELETE CASCADE,
