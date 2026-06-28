@@ -49,6 +49,7 @@
     \node[attribute, below=2pt of filmtitle] (filmdur) {Duration};
     \node[attribute, below=2pt of filmid] (filmyear) {Year};
     \node[attribute, below=2pt of filmyear] (filmcountry) {Country};
+    \node[attribute, left=9mm of film] (eval_final) {Final\_Score};
 
     \node[entity, above=7cm of film] (person) {PERSON};
 
@@ -103,8 +104,7 @@
     \node[cardinality, above left=3mm and -9mm of evaluates] {M};
     \node[cardinality, below left=3mm and -9mm of evaluates] {N};
 
-    \node[attribute, below left=5mm and 16mm of evaluates] (eval_score) {Score};
-    \node[attribute, below=2pt of eval_score] (eval_final) {Final\_Score};
+    \node[attribute, below left=1cm of evaluates] (eval_score) {Score};
 
     % ===== DRAW ALL CONNECTIONS =====
     \draw (festival) -- (fid);
@@ -126,6 +126,7 @@
     \draw (film) -- (filmdur);
     \draw (film) -- (filmyear);
     \draw (film) -- (filmcountry);
+    \draw (film) -- (eval_final);
 
     \draw (person) -- (pid);
     \draw (person) -- (pname);
@@ -162,7 +163,7 @@
     \draw (judge) -- (evaluates);
     \draw[double] (evaluates) -- (film);
     \draw (evaluates) -- (eval_score);
-    \draw (evaluates) -- (eval_final);
+
 
 \end{tikzpicture}
 \end{document}
