@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `film` (
     `year` INTEGER NOT NULL CHECK(`year` >= 1888),
     `country` TEXT NOT NULL,
     `category_id` INTEGER NOT NULL,
+    `final_score` INTEGER DEFAULT 0 CHECK(`final_score` BETWEEN 0 AND 100),
 
     FOREIGN KEY(`category_id`) REFERENCES `category`(`id`)
 );
@@ -116,8 +117,6 @@ CREATE TABLE IF NOT EXISTS `evaluation` (
     `film_id` INTEGER NOT NULL,
 
     `score` INTEGER CHECK(`score` BETWEEN 0 AND 100),
-
-    `final_score` INTEGER CHECK(`final_score` BETWEEN 0 AND 100),
 
     PRIMARY KEY (`judge_id`, `film_id`),
 
