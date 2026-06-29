@@ -105,7 +105,7 @@ INSERT INTO `festival_film` VALUES
 
 -- ===== FILM-DIRECTOR =====
 INSERT INTO `film_director` VALUES
-(1,1), (2,2), (3,3), (4,4), (5,5), (6,1),
+(1,1), (1, 2), (2,2), (3,3), (4,4), (5,5), (6,1),
 (7,6), (8,7), (9,8), (10,2), (11,3), (12,4);
 
 -- ===== FILM-ACTOR =====

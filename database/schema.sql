@@ -1,5 +1,10 @@
 PRAGMA foreign_keys = ON;
 
+-- =====================================================
+-- TABLES
+-- =====================================================
+
+
 -- Festival
 CREATE TABLE IF NOT EXISTS `festival` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -142,3 +147,56 @@ CREATE TABLE IF NOT EXISTS `festival_film` (
         REFERENCES `film`(`id`)
         ON DELETE CASCADE
 );
+
+-- =====================================================
+-- INDEXES
+-- =====================================================
+
+-- Index for film title searches
+CREATE INDEX IF NOT EXISTS `idx_film_title`
+ON `film`(`title`);
+
+-- Index for actor/director name searches
+CREATE INDEX IF NOT EXISTS `idx_person_type_name`
+ON `person`(`type`, `name`);
+
+
+-- =====================================================
+-- VIEWS
+-- =====================================================
+
+-- Directors
+CREATE VIEW IF NOT EXISTS `director` AS
+SELECT
+    `id`,
+    `name`
+FROM `person`
+WHERE `type` = 'director';
+
+
+-- Actors
+CREATE VIEW IF NOT EXISTS `actor` AS
+SELECT
+    `id`,
+    `name`
+FROM `person`
+WHERE `type` = 'actor';
+
+
+-- Judges
+CREATE VIEW IF NOT EXISTS `judge` AS
+SELECT
+    `id`,
+    `name`,
+    `specialization`
+FROM `staff`
+WHERE `type` = 'judge';
+
+
+-- Coordinators
+CREATE VIEW IF NOT EXISTS `coordinator` AS
+SELECT
+    `id`,
+    `name`
+FROM `staff`
+WHERE `type` = 'coordinator';

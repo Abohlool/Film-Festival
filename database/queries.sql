@@ -22,24 +22,20 @@ GROUP BY
 
 -- Directors of a film
 SELECT
-    `p`.`name` AS 'director'
-FROM `film` AS 'f'
+    `d`.`name` AS 'director'
+FROM `director` AS 'd'
 JOIN `film_director` AS 'fd'
-    ON `f`.`id` = `fd`.`film_id`
-JOIN `person` AS 'p'
-    ON `fd`.`director_id` = `p`.`id`
-WHERE `f`.`id` = ?;
+    ON `fd`.`director_id` = `d`.`id`
+WHERE `fd`.`film_id` = ?;
 
 
 -- Actors of a film
 SELECT
-    `p`.`name` AS 'actor'
-FROM `film` AS 'f'
+    `a`.`name` AS 'actor'
+FROM `actor` AS 'a'
 JOIN `film_actor` AS 'fa'
-    ON `f`.`id` = `fa`.`film_id`
-JOIN `person` AS 'p'
-    ON `fa`.`actor_id` = `p`.`id`
-WHERE `f`.`id` = ?;
+    ON `a`.`id` = `fa`.`actor_id`
+WHERE `fa`.`film_id` = ?;
 
 
 -- Future screenings of a film
@@ -49,12 +45,12 @@ SELECT
     `sc`.`date`,
     `sc`.`room`,
     `sc`.`capacity`,
-    `s`.`name`
+    `c`.`name`
 FROM `film` AS 'f'
 JOIN `screening` AS 'sc'
     ON `f`.`id` = `sc`.`film_id`
-JOIN `staff` AS 's'
-    ON `s`.`id` = `sc`.`coordinator_id`
+JOIN `coordinator` AS 'c'
+    ON `c`.`id` = `sc`.`coordinator_id`
 WHERE `f`.`id` = ?
     AND datetime(`sc`.`date` || ' ' || `sc`.`time`) > datetime('now')
 ORDER BY `sc`.`date`, `sc`.`time`;
@@ -127,18 +123,17 @@ WHERE `e`.`film_id` IS NULL;
 
 -- Judges evaluating over five films
 SELECT
-    `s`.`id`,
-    `s`.`name`,
-    `s`.`specialization`,
+    `j`.`id`,
+    `j`.`name`,
+    `j`.`specialization`,
     COUNT(`e`.`film_id`) AS 'films_evaluated'
-FROM `staff` AS 's'
+FROM `judge` AS 'j'
 JOIN `evaluation` AS 'e'
-    ON `s`.`id` = `e`.`judge_id`
-WHERE `s`.`type` = 'judge'
+    ON `j`.`id` = `e`.`judge_id`
 GROUP BY
-    `s`.`id`,
-    `s`.`name`,
-    `s`.`specialization`
+    `j`.`id`,
+    `j`.`name`,
+    `j`.`specialization`
 HAVING COUNT(`e`.`film_id`) > 5
 ORDER BY `films_evaluated` DESC;
 
@@ -154,20 +149,20 @@ JOIN `film_director` AS 'fd'
 GROUP BY
     `f`.`id`,
     `f`.`title`
-HAVING COUNT(`fd`.`director_id`) > 1;
+HAVING COUNT(DISTINCT `fd`.`director_id`) > 1;
 
 
 -- Actors in more than two films
 SELECT
-    `p`.`id`,
-    `p`.`name`,
+    `a`.`id`,
+    `a`.`name`,
     COUNT(`fa`.`actor_id`) AS 'film_count'
-FROM `person` AS 'p'
+FROM `actor` AS 'a'
 JOIN `film_actor` AS 'fa'
-    ON `p`.`id` = `fa`.`actor_id`
+    ON `a`.`id` = `fa`.`actor_id`
 GROUP BY
-    `p`.`id`,
-    `p`.`name`
+    `a`.`id`,
+    `a`.`name`
 HAVING COUNT(`fa`.`actor_id`) > 2;
 
 
@@ -177,14 +172,13 @@ SELECT
     `sc`.`time`,
     `sc`.`room`,
     `sc`.`capacity`,
-    `s`.`name`
+    `c`.`name`
 FROM `film` AS 'f'
 JOIN `screening` AS 'sc'
     ON `f`.`id` = `sc`.`film_id`
-JOIN `staff` AS 's'
-    ON `s`.`id` = `sc`.`coordinator_id`
-WHERE `sc`.`date` = ?
-ORDER BY `sc`.`time`;
+JOIN `coordinator` AS 'c'
+    ON `c`.`id` = `sc`.`coordinator_id`
+WHERE `sc`.`date` = ?;
 
 
 -- Screenings per room by date
@@ -198,15 +192,14 @@ GROUP BY `sc`.`room`;
 
 -- Judges without evaluations
 SELECT
-    `s`.`id`,
-    `s`.`name`,
-    `s`.`specialization`
-FROM `staff` AS 's'
+    `j`.`id`,
+    `j`.`name`,
+    `j`.`specialization`
+FROM `judge` AS 'j'
 LEFT JOIN `evaluation` AS 'e'
-    ON `s`.`id` = `e`.`judge_id`
-WHERE `s`.`type` = 'judge'
-    AND `e`.`judge_id` IS NULL
-ORDER BY `s`.`name`;
+    ON `j`.`id` = `e`.`judge_id`
+WHERE `e`.`judge_id` IS NULL
+ORDER BY `j`.`name`;
 
 
 -- Films without screenings
@@ -217,8 +210,6 @@ FROM `film` AS 'f'
 LEFT JOIN `screening` AS 'sc'
     ON `sc`.`film_id` = `f`.`id`
 WHERE `sc`.`film_id` IS NULL;
-
-
 
 
 -- Screenings by coordinator
@@ -248,10 +239,10 @@ WHERE `e`.`judge_id` = ?;
 
 -- Director info for a specific film
 SELECT
-    `p`.*
-FROM `person` AS 'p'
+    `d`.*
+FROM `director` AS 'd'
 JOIN `film_director` AS 'fd'
-    ON `p`.`id` = `fd`.`director_id`
+    ON `d`.`id` = `fd`.`director_id`
 JOIN `film` AS 'f'
     ON `fd`.`film_id` = `f`.`id`
 WHERE `f`.`id` = ?;
