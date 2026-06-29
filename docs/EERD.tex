@@ -5,18 +5,71 @@
     shapes,
     positioning,
     fit,
+    backgrounds,
 }
 
 \tikzset{
-    double distance=2pt,
-    node distance=1.5cm,
-    entity/.style={rectangle, draw, text centered, minimum height=1cm, minimum width=2.5cm, align=center},
-    attribute/.style={ellipse, draw, text centered, minimum height=0.7cm, minimum width=1.5cm, align=center},
-    relation/.style={diamond, draw, text centered, minimum height=0.5cm, minimum width=1.5cm, align=center, aspect=2},
-    spec/.style={circle, draw, text centered, minimum width=0.4, align=center},
-    cardinality/.style={font=\small},
-    multivaluedattribute/.style={attribute, double},
-    agg/.style={draw, inner sep=10pt},
+    entity/.style={
+        rectangle,
+        draw=black!70,
+        fill=blue!5,
+        text centered,
+        minimum height=1cm,
+        minimum width=2.5cm,
+        align=center,
+        rounded corners=3pt,
+        line width=1pt,
+        font=\sffamily\bfseries\small
+    },
+    attribute/.style={
+        ellipse,
+        draw=black!50,
+        fill=yellow!5,
+        text centered,
+        minimum height=0.7cm,
+        minimum width=1.5cm,
+        align=center,
+        font=\sffamily\footnotesize
+    },
+    keyattribute/.style={
+        attribute,
+        draw=black!70,
+        fill=yellow!10,
+    },
+    relation/.style={
+        diamond,
+        draw=black!70,
+        fill=orange!10,
+        text centered,
+        minimum height=0.5cm,
+        minimum width=1.5cm,
+        align=center,
+        aspect=2,
+        font=\sffamily\footnotesize\itshape
+    },
+    spec/.style={
+        circle,
+        draw=black!70,
+        fill=white,
+        text centered,
+        minimum width=0.4,
+        align=center,
+        font=\sffamily\bfseries\small
+    },
+    cardinality/.style={
+        font=\sffamily\footnotesize\bfseries,
+        fill=white,
+        inner sep=1pt
+    },
+    connection/.style={
+        draw=black!50,
+        line width=0.7pt
+    },
+    doubleconnection/.style={
+        draw=black!50,
+        line width=0.7pt,
+        double distance=2pt
+    },
 }
 
 \begin{document}
@@ -24,62 +77,62 @@
 \begin{tikzpicture}
     \node[entity] (festival) {FESTIVAL};
 
-    \node[attribute, left=5mm of festival] (ftitle) {Title};
-    \node[attribute, above=2pt of ftitle] (fid) {\underline{ID}};
+    \node[keyattribute, left=5mm of festival] (ftitle) {Title};
+    \node[keyattribute, above=2pt of ftitle] (fid) {\underline{ID}};
     \node[attribute, below=2pt of ftitle] (fyear) {Year};
     \node[attribute, below=2pt of fyear] (flocation) {Location};
 
     \node[relation, below=7mm of festival] (fest_has) {HAS};
-    \node[cardinality, above left=0.3em and -1.6em of fest_has] {M};
-    \node[cardinality, below left=0.3em and -1.6em of fest_has] {N};
+    \node[cardinality, above left=2mm and -1em of fest_has] {M};
+    \node[cardinality, below left=2mm and -1.2em of fest_has] {N};
 
     \node[entity, below=7mm of fest_has] (category) {CATEGORY};
 
-    \node[attribute, above left=-4mm and 5mm of category] (cid) {\underline{ID}};
+    \node[keyattribute, above left=-4mm and 5mm of category] (cid) {\underline{ID}};
     \node[attribute, below=2pt of cid] (cname) {Name};
 
     \node[relation, right=1cm of category] (belongs_to) {BELONGS\_TO};
-    \node[cardinality, above right=-1mm and -1mm of belongs_to] {N};
-    \node[cardinality, above left=-5mm and 7mm of belongs_to] {1};
+    \node[cardinality, above right=-.5mm and 0.5mm of belongs_to] {N};
+    \node[cardinality, above left=-3mm and 6mm of belongs_to] {1};
 
-    \node[entity, right= 8cm of fest_has] (film) {FILM};
+    \node[entity, right=6.5cm of fest_has] (film) {FILM};
 
-    \node[attribute, below right=2mm and 9mm of film] (filmid) {\underline{ID}};
-    \node[attribute, below left=9mm and 12mm of film] (filmtitle) {Title};
+    \node[keyattribute, below right=2mm and 9mm of film] (filmid) {\underline{ID}};
+    \node[attribute, below left=6mm and 7mm of film] (filmtitle) {Title};
     \node[attribute, below=2pt of filmtitle] (filmdur) {Duration};
     \node[attribute, below=2pt of filmid] (filmyear) {Year};
     \node[attribute, below=2pt of filmyear] (filmcountry) {Country};
-    \node[attribute, left=9mm of film] (eval_final) {Final\_Score};
+    \node[attribute, left=6mm of film] (eval_final) {Final\_Score};
 
     \node[entity, above=7cm of film] (person) {PERSON};
 
-    \node[attribute, above left=-3.5mm and 5mm of person] (pid) {\underline{ID}};
-    \node[attribute, below left=-3.5mm and 5mm of person] (pname) {Name};
+    \node[keyattribute, above left=-3.8mm and 5mm of person] (pid) {\underline{ID}};
+    \node[attribute, below left=-3.8mm and 5mm of person] (pname) {Name};
 
     \node[spec, below=1cm of person] (person_spec) {D};
     \node[entity, below left=1cm and 0.5cm of person_spec] (director) {DIRECTOR};
     \node[entity, below right=1cm and 0.5cm of person_spec] (actor) {ACTOR};
 
     \node[relation, below=1cm of director] (directs) {DIRECTS};
-    \node[cardinality, below right=1.5mm and -5.5mm of directs] {M};
-    \node[cardinality, above right=2mm and -8mm of directs] {N};
+    \node[cardinality, below right=2mm and -4mm of directs] {M};
+    \node[cardinality, above right=2.5mm and -5mm of directs] {N};
 
     \node[relation, below=1cm of actor] (acts_in) {ACTS\_IN};
-    \node[cardinality, above left=2mm and -7.5mm of acts_in] {M};
-    \node[cardinality, below left=1mm and -6mm of acts_in] {N};
+    \node[cardinality, above left=2.5mm and -5mm of acts_in] {N};
+    \node[cardinality, below left=2mm and -4mm of acts_in] {M};
 
-    \node[relation, above=2cm of belongs_to] (has_film) {HAS};
-    \node[cardinality, above left=-3mm and 3mm of has_film] {N};
-    \node[cardinality, below right=0mm and -2mm of has_film] {M};
+    \node[relation, above=2.1cm of belongs_to] (has_film) {HAS};
+    \node[cardinality, below left=-1mm and 2mm of has_film] {N};
+    \node[cardinality, below right=0mm and 0mm of has_film] {M};
 
     \node[relation, right=6mm of film] (film_has) {HAS};
-    \node[cardinality, above left=-3mm and 3mm of film_has] {1};
-    \node[cardinality, above right=-3mm and 3mm of film_has] {N};
+    \node[cardinality, above left=-1.5mm and 3mm of film_has] {1};
+    \node[cardinality, above right=-1.5mm and 3mm of film_has] {N};
 
     \node[spec, below=5cm of film_has] (staff_spec) {D};
 
     \node[entity, below=1cm of staff_spec] (staff) {STAFF};
-    \node[attribute, below left=5mm and -1cm of staff] (sid) {\underline{ID}};
+    \node[keyattribute, below left=5mm and -1cm of staff] (sid) {\underline{ID}};
     \node[attribute, below right=5mm and -1cm of staff] (sname) {Name};
 
     \node[entity, above left=1cm and 12.5mm of staff_spec] (judge) {JUDGE};
@@ -90,80 +143,86 @@
 
     \node[entity, right=6mm of film_has] (screening) {SCREENING};
 
-    \node[attribute, above left=5mm and 0mm of screening] (scid) {\underline{ID}};
+    \node[keyattribute, above left=5mm and 0mm of screening] (scid) {\underline{ID}};
     \node[attribute, right=2pt of scid] (scdate) {Date};
     \node[attribute, right=2pt of scdate] (sctime) {Time};
     \node[attribute, right=2pt of sctime] (scroom) {Room};
     \node[attribute, below=2pt of scroom] (sccap) {Capacity};
 
     \node[relation, above=5mm of coordinator] (coordinates) {COORDINATES};
-    \node[cardinality, above left=3.5mm and -1cm of coordinates] {N};
-    \node[cardinality, below left=3.5mm and -1cm of coordinates] {1};
+    \node[cardinality, above left=3.5mm and -7mm of coordinates] {N};
+    \node[cardinality, below left=3.5mm and -7mm of coordinates] {1};
 
     \node[relation, above=7mm of judge] (evaluates) {EVALUATES};
-    \node[cardinality, above left=3mm and -9mm of evaluates] {M};
-    \node[cardinality, below left=3mm and -9mm of evaluates] {N};
+    \node[cardinality, above right=3mm and -6mm of evaluates] {M};
+    \node[cardinality, below right=3mm and -6mm of evaluates] {N};
 
-    \node[attribute, below left=1cm of evaluates] (eval_score) {Score};
+    \node[attribute, below left=6mm and 1cm of evaluates] (eval_score) {Score};
 
     % ===== DRAW ALL CONNECTIONS =====
-    \draw (festival) -- (fid);
-    \draw (festival) -- (ftitle);
-    \draw (festival) -- (fyear);
-    \draw (festival) -- (flocation);
-    \draw[double] (festival) -- (fest_has);
-    \draw (fest_has) -- (category);
-    \draw (festival) -- (has_film);
-    \draw[double] (has_film) -- (film);
+    \draw[connection] (festival) -- (fid);
+    \draw[connection] (festival) -- (ftitle);
+    \draw[connection] (festival) -- (fyear);
+    \draw[connection] (festival) -- (flocation);
+    \draw[doubleconnection] (festival) -- (fest_has);
+    \draw[connection] (fest_has) -- (category);
+    \draw[doubleconnection] (festival) -- (has_film);
+    \draw[connection] (has_film) -- (film);
 
-    \draw (category) -- (cid);
-    \draw (category) -- (cname);
-    \draw (category) -- (belongs_to);
-    \draw[double] (belongs_to) -- (film);
+    \draw[connection] (category) -- (cid);
+    \draw[connection] (category) -- (cname);
+    \draw[doubleconnection] (category) -- (belongs_to);
+    \draw[connection] (belongs_to) -- (film);
 
-    \draw (film) -- (filmid);
-    \draw (film) -- (filmtitle);
-    \draw (film) -- (filmdur);
-    \draw (film) -- (filmyear);
-    \draw (film) -- (filmcountry);
-    \draw (film) -- (eval_final);
+    \draw[connection] (film) -- (filmid);
+    \draw[connection] (film) -- (filmtitle);
+    \draw[connection] (film) -- (filmdur);
+    \draw[connection] (film) -- (filmyear);
+    \draw[connection] (film) -- (filmcountry);
+    \draw[connection] (film) -- (eval_final);
 
-    \draw (person) -- (pid);
-    \draw (person) -- (pname);
-    \draw[double] (person) -- (person_spec);
-    \draw (person_spec) -- (director);
-    \draw (person_spec) -- (actor);
+    \draw[connection] (person) -- (pid);
+    \draw[connection] (person) -- (pname);
+    \draw[doubleconnection] (person) -- (person_spec);
+    \draw[connection] (person_spec) -- (director);
+    \draw[connection] (person_spec) -- (actor);
 
-    \draw (director) -- (directs);
-    \draw[double] (directs.south) -- (film);
+    \draw[doubleconnection] (director) -- (directs);
+    \draw[connection] (directs.south) -- (film);
 
-    \draw (actor) -- (acts_in);
-    \draw[double] (acts_in.south) -- (film);
+    \draw[doubleconnection] (actor) -- (acts_in);
+    \draw[connection] (acts_in.south) -- (film);
 
-    \draw (film) -- (film_has);
-    \draw[double] (film_has) -- (screening);
+    \draw[doubleconnection] (film) -- (film_has);
+    \draw[connection] (film_has) -- (screening);
 
-    \draw (screening) -- (scid);
-    \draw (screening) -- (scdate);
-    \draw (screening) -- (sctime);
-    \draw (screening) -- (scroom);
-    \draw (screening) -- (sccap);
+    \draw[connection] (screening) -- (scid);
+    \draw[connection] (screening) -- (scdate);
+    \draw[connection] (screening) -- (sctime);
+    \draw[connection] (screening) -- (scroom);
+    \draw[connection] (screening) -- (sccap);
 
-    \draw[double] (screening) -- (coordinates);
-    \draw[double] (coordinates) -- (coordinator);
+    \draw[doubleconnection] (screening) -- (coordinates);
+    \draw[connection] (coordinates) -- (coordinator);
 
-    \draw (staff) -- (sid);
-    \draw (staff) -- (sname);
+    \draw[connection] (staff) -- (sid);
+    \draw[connection] (staff) -- (sname);
 
-    \draw (judge) -- (specialization);
-    \draw (judge) -- (staff_spec);
-    \draw (staff_spec) -- (coordinator);
-    \draw[double] (staff_spec) -- (staff);
+    \draw[connection] (judge) -- (specialization);
+    \draw[connection] (judge) -- (staff_spec);
+    \draw[connection] (staff_spec) -- (coordinator);
+    \draw[doubleconnection] (staff_spec) -- (staff);
 
-    \draw (judge) -- (evaluates);
-    \draw[double] (evaluates) -- (film);
-    \draw (evaluates) -- (eval_score);
+    \draw[doubleconnection] (judge) -- (evaluates);
+    \draw[connection] (evaluates) -- (film);
+    \draw[connection] (evaluates) -- (eval_score);
 
+    \draw[doubleconnection] (coordinator) -- (coordinates);
+
+    \node[left=0 of flocation] {};
+    \node[below=0 of sid] {};
+    \node[above=0 of pid] {};
+    \node[right=0 of sccap] {};
 
 \end{tikzpicture}
 \end{document}
