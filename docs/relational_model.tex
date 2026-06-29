@@ -33,12 +33,16 @@ $
 &\text{Person}(\underline{\text{id}}, \text{name}, \text{type})\\[4pt]
 &\text{Staff}(\underline{\text{id}}, \text{name}, \text{type}, \text{specialization})\\[4pt]
 &\text{Film}(\underline{\text{id}}, \text{title}, \text{duration}, \text{year}, \text{country}, \text{category\_id}, \text{final\_score})\\[4pt]
-&\text{Screening}(\underline{\text{id}}, \text{date}, \text{time}, \text{room}, \text{capacity}, \text{film\_id}, \text{coordinator\_id})\\[4pt]
+&\text{Screening}(\underline{\text{id}}, \text{date}, \text{time}, \text{room}, \text{capacity}, \text{fim\_id}, \text{coordinator\_id})\\[4pt]
 &\text{FestivalCategory}(\underline{\text{festival\_id}}, \underline{\text{category\_id}})\\[4pt]
 &\text{FestivalFilm}(\underline{\text{festival\_id}}, \underline{\text{film\_id}})\\[4pt]
 &\text{FilmDirector}(\underline{\text{film\_id}}, \underline{\text{director\_id}})\\[4pt]
 &\text{FilmActor}(\underline{\text{film\_id}}, \underline{\text{actor\_id}})\\[4pt]
-&\text{Evaluation}(\underline{\text{judge\_id}}, \underline{\text{film\_id}}, \text{score})
+&\text{Evaluation}(\underline{\text{judge\_id}}, \underline{\text{film\_id}}, \text{score})\\[8pt]
+&\text{Director} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'director'}}(\text{Person}))\\[4pt]
+&\text{Actor} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'actor'}}(\text{Person}))\\[4pt]
+&\text{Judge} = \pi_{\text{id},\ \text{name},\ \text{specialization}}(\sigma_{\text{type}=\text{'judge'}}(\text{Staff}))\\[4pt]
+&\text{Coordinator} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'coordinator'}}(\text{Staff}))
 \end{aligned}
 $
 }
@@ -46,6 +50,7 @@ $
 \newpage
 
 \section{Relational Algebra Queries}
+
 \begin{enumerate}
 
 \item Films in a specific festival
@@ -71,7 +76,7 @@ $
 \[
 \pi_{\text{name}}
 \left(
-\text{Person} \Join_{\text{Person.id}=\text{FilmDirector.director\_id}}
+\text{Director} \Join_{\text{Director.id}=\text{FilmDirector.director\_id}}
 \sigma_{\text{film\_id}=x}(\text{FilmDirector})
 \right)
 \]
@@ -80,7 +85,7 @@ $
 \[
 \pi_{\text{name}}
 \left(
-\text{Person} \Join_{\text{Person.id}=\text{FilmActor.actor\_id}}
+\text{Actor} \Join_{\text{Actor.id}=\text{FilmActor.actor\_id}}
 \sigma_{\text{film\_id}=x}(\text{FilmActor})
 \right)
 \]
@@ -88,14 +93,17 @@ $
 \item Future screenings of a film
 \[
 \begin{aligned}
+\mathcal{T}_{\text{date, time}}
+\Big(
 \pi_{\text{title, time, date, room, capacity, name}}
 \Big(
-&\sigma_{\text{film\_id}=x\ \land\ \text{datetime}>\text{now}}
+&\sigma_{\text{Film.id}=x\ \land\ \text{datetime}>\text{now}}
 (\text{Screening})\\
-&\Join_{\text{Screening.coordinator\_id}=\text{Staff.id}}
-\text{Staff}\\
+&\Join_{\text{Screening.coordinator\_id}=\text{Coordinator.id}}
+\text{Coordinator}\\
 &\Join_{\text{Screening.film\_id}=\text{Film.id}}
 \text{Film}
+\Big)
 \Big)
 \end{aligned}
 \]
@@ -161,8 +169,8 @@ $
 \text{id},\ \text{name},\ \text{specialization}\\
 &\Im_{\ \text{COUNT film\_id AS films\_evaluated}}
 \Big(\\
-&\sigma_{\text{type}=\text{'judge'}}(\text{Staff})\\
-&\Join_{\text{Staff.id}=\text{Evaluation.judge\_id}}
+&\text{Judge}\\
+&\Join_{\text{Judge.id}=\text{Evaluation.judge\_id}}
 \text{Evaluation}
 \Big)
 \Big)
@@ -175,7 +183,7 @@ $
 \begin{aligned}
 \sigma_{\text{director\_count}>1}
 \Big(
-&\text{id},\ \text{title}\ \Im_{\ \text{COUNT director\_id AS director\_count}}
+&\text{id},\ \text{title}\ \Im_{\ \text{COUNT DISTINCT director\_id AS director\_count}}
 \Big(\\
 &\text{Film}
 \Join_{\text{Film.id}=\text{FilmDirector.film\_id}}
@@ -192,8 +200,8 @@ $
 \Big(
 &\text{id},\ \text{name}\ \Im_{\ \text{COUNT actor\_id AS film\_count}}
 \Big(\\
-&\text{Person}
-\Join_{\text{Person.id}=\text{FilmActor.actor\_id}}
+&\text{Actor}
+\Join_{\text{Actor.id}=\text{FilmActor.actor\_id}}
 \text{FilmActor}
 \Big)
 \Big)
@@ -207,8 +215,8 @@ $
 \Big(
 &\sigma_{\text{date}=x}
 (\text{Screening})\\
-&\Join_{\text{Screening.coordinator\_id}=\text{Staff.id}}
-\text{Staff}\\
+&\Join_{\text{Screening.coordinator\_id}=\text{Coordinator.id}}
+\text{Coordinator}\\
 &\Join_{\text{Screening.film\_id}=\text{Film.id}}
 \text{Film}
 \Big)
@@ -226,17 +234,17 @@ $
 \item Judges without evaluations
 \[
 \begin{aligned}
-\pi_{\text{Staff.id, Staff.name, Staff.specialization}}
+\mathcal{T}_{\text{name}}
 \Big(
-&\mathcal{T}_{\text{Staff.name}}
+\pi_{\text{Judge.id, Judge.name, Judge.specialization}}
+\Big(
+&\sigma_{\text{Evaluation.judge\_id IS NULL}}
 \big(\\
-&\sigma_{\text{judge\_id IS NULL}}
-\big(\\
-&\sigma_{\text{type}=\text{'judge'}}(\text{Staff})\\
-&\leftouterjoin_{\text{Staff.id}=\text{Evaluation.judge\_id}}
+&\text{Judge}\\
+&\leftouterjoin_{\text{Judge.id}=\text{Evaluation.judge\_id}}
 \text{Evaluation}
 \big)
-\big)
+\Big)
 \Big)
 \end{aligned}
 \]
@@ -255,8 +263,6 @@ $
 \Big)
 \end{aligned}
 \]
-
-\hrule
 
 \item Screenings by coordinator
 \[
@@ -289,9 +295,9 @@ $
 \item Director info for a specific film
 \[
 \begin{aligned}
-\pi_{\text{Person.*}}
+\pi_{\text{Director.*}}
 \Big(
-&\text{Person} \Join_{\text{Person.id}=\text{FilmDirector.director\_id}}
+&\text{Director} \Join_{\text{Director.id}=\text{FilmDirector.director\_id}}
 \big(\\
 &\text{FilmDirector} \Join_{\text{FilmDirector.film\_id}=\text{Film.id}}
 \sigma_{\text{Film.id}=x}(\text{Film})
@@ -301,4 +307,5 @@ $
 \]
 
 \end{enumerate}
+
 \end{document}
