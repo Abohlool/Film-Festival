@@ -90,7 +90,7 @@ GROUP BY
 
 
 /*
--- Stored final scores
+-- Average score
 SELECT
     `f`.`id`,
     `f`.`title`,
@@ -219,6 +219,8 @@ LEFT JOIN `screening` AS 'sc'
 WHERE `sc`.`film_id` IS NULL;
 
 
+
+
 -- Screenings by coordinator
 SELECT
     `sc`.`id`,
@@ -233,7 +235,7 @@ JOIN `film` AS 'f'
 WHERE `sc`.`coordinator_id` = ?;
 
 
--- Films evaluated by judge
+-- Films evaluated by a specific judge
 SELECT
     `f`.`id`,
     `f`.`title`,
@@ -244,7 +246,7 @@ JOIN `film` AS 'f'
 WHERE `e`.`judge_id` = ?;
 
 
--- Director records for film
+-- Director info for a specific film
 SELECT
     `p`.*
 FROM `person` AS 'p'
