@@ -88,14 +88,14 @@
 
     \node[entity, below=7mm of fest_has] (category) {CATEGORY};
 
-    \node[keyattribute, above left=-4mm and 5mm of category] (cid) {\underline{ID}};
-    \node[attribute, below=2pt of cid] (cname) {Name};
+    \node[keyattribute, above left=-3.8mm and 5mm of category] (cid) {\underline{ID}};
+    \node[attribute, below left=-3.8mm and 5mm of category] (cname) {Name};
 
-    \node[relation, right=1cm of category] (belongs_to) {BELONGS\_TO};
+    \node[relation, right=5mm of category] (belongs_to) {BELONGS\_TO};
     \node[cardinality, above right=-.5mm and 0.5mm of belongs_to] {N};
     \node[cardinality, above left=-3mm and 6mm of belongs_to] {1};
 
-    \node[entity, right=6.5cm of fest_has] (film) {FILM};
+    \node[entity, right=6cm of fest_has] (film) {FILM};
 
     \node[keyattribute, below right=2mm and 9mm of film] (filmid) {\underline{ID}};
     \node[attribute, below left=6mm and 7mm of film] (filmtitle) {Title};
@@ -104,14 +104,14 @@
     \node[attribute, below=2pt of filmyear] (filmcountry) {Country};
     \node[attribute, left=6mm of film] (eval_final) {Final\_Score};
 
-    \node[entity, above=7cm of film] (person) {PERSON};
+    \node[entity, above=6cm of film] (person) {PERSON};
 
     \node[keyattribute, above left=-3.8mm and 5mm of person] (pid) {\underline{ID}};
     \node[attribute, below left=-3.8mm and 5mm of person] (pname) {Name};
 
-    \node[spec, below=1cm of person] (person_spec) {D};
-    \node[entity, below left=1cm and 0.5cm of person_spec] (director) {DIRECTOR};
-    \node[entity, below right=1cm and 0.5cm of person_spec] (actor) {ACTOR};
+    \node[spec, below=7mm of person] (person_spec) {D};
+    \node[entity, below left=7mm and 5mm of person_spec] (director) {DIRECTOR};
+    \node[entity, below right=7mm and 5mm of person_spec] (actor) {ACTOR};
 
     \node[relation, below=1cm of director] (directs) {DIRECTS};
     \node[cardinality, below right=2mm and -4mm of directs] {M};
@@ -131,15 +131,15 @@
 
     \node[spec, below=5cm of film_has] (staff_spec) {D};
 
-    \node[entity, below=1cm of staff_spec] (staff) {STAFF};
-    \node[keyattribute, below left=5mm and -1cm of staff] (sid) {\underline{ID}};
-    \node[attribute, below right=5mm and -1cm of staff] (sname) {Name};
+    \node[entity, below=7mm of staff_spec] (staff) {STAFF};
+    \node[keyattribute, above left=-3.8mm and 5mm of staff] (sid) {\underline{ID}};
+    \node[attribute, below left=-3.8mm and 5mm of staff] (sname) {Name};
 
-    \node[entity, above left=1cm and 12.5mm of staff_spec] (judge) {JUDGE};
+    \node[entity, above left=7mm and 12.5mm of staff_spec] (judge) {JUDGE};
 
     \node[attribute, below left=0.5cm and -1cm of judge] (specialization) {Specialization};
 
-    \node[entity, above right=1cm and 10.8mm of staff_spec] (coordinator) {COORDINATOR};
+    \node[entity, above right=7mm and 10.8mm of staff_spec] (coordinator) {COORDINATOR};
 
     \node[entity, right=6mm of film_has] (screening) {SCREENING};
 
@@ -220,7 +220,7 @@
     \draw[doubleconnection] (coordinator) -- (coordinates);
 
     \node[left=0 of flocation] {};
-    \node[below=0 of sid] {};
+    \node[below=0 of sname] {};
     \node[above=0 of pid] {};
     \node[right=0 of sccap] {};
 
