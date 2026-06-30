@@ -69,8 +69,10 @@ Festivals, films, people, staff, screenings, and evaluations are captured in SQL
 
 * **Screening**: Represents a scheduled showing of a film.
   * `id`, `date`, `time`, `room`, `capacity`, `film_id`, `coordinator_id`
-  * `date`, `time`, and `room` default to 'unavailable'.
+  * `date`, `time`, and `room` default to NULL.
   * `capacity` must be non-negative.
+  * UNIQUE constraint on (`room`, `date`, `time`) prevents double booking a room at the same date and time.
+  * UNIQUE constraint on `(coordinator_id, date, time)` prevents scheduling a coordinator for multiple simultaneous screenings.
   * FOREIGN KEY references to `film` (CASCADE delete) and `staff`.
 
 * Use of INTEGER PRIMARY KEY AUTOINCREMENT for surrogate keys.
@@ -119,7 +121,7 @@ Festivals, films, people, staff, screenings, and evaluations are captured in SQL
 * **No detailed film metadata**: The system does not store synopses, trailers, languages, subtitles, production companies, or budget information.
 * **No ticketing or attendance**: The database does not track ticket sales, audience numbers, or seat reservations for screenings.
 * **No venue management**: Beyond simple room names, there is no tracking of venue addresses, seating layouts, or equipment.
-* **No conflict detection**: The system does not automatically prevent scheduling conflicts for rooms or coordinators (e.g., double-booking a room at the same time).
+* **No conflict detection for films**: While rooms and coordinators cannot be double-booked (enforced by UNIQUE constraints), the system does not prevent the same film from being screened simultaneously in different rooms.
 * **Limited staff roles**: Only judges and coordinators are represented; other staff roles (organizers, volunteers, technical crew) are not modeled.
 * **No awards or competition tracking**: The database stores scores but does not manage award categories, winners, or competition rules.
 * **Simplified person model**: Directors and actors are stored in the same `person` table, which works for this scope but limits the ability to store role-specific attributes (e.g., actor filmography details, director biography).
