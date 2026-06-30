@@ -59,14 +59,17 @@ CREATE TABLE IF NOT EXISTS `film` (
 CREATE TABLE IF NOT EXISTS `screening` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
 
-    `date` TEXT DEFAULT 'unavailable',
-    `time` TEXT DEFAULT 'unavailable',
-    `room` TEXT DEFAULT 'unavailable',
+    `date` TEXT,
+    `time` TEXT,
+    `room` TEXT,
 
     `capacity` INTEGER CHECK(`capacity` >= 0),
 
     `film_id` INTEGER NOT NULL,
     `coordinator_id` INTEGER NOT NULL,
+
+    UNIQUE (`room`, `date`, `time`),
+    UNIQUE (`coordinator_id`, `date`, `time`),
 
     FOREIGN KEY(`film_id`) REFERENCES `film`(`id`)
         ON DELETE CASCADE,
