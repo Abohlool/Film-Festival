@@ -18,7 +18,7 @@ Email: [abohloolk@gmail.com](mailto:abohloolk@gmail.com)
 
 * Add, update, and query festivals with their associated categories and film submissions.
 * Manage film records including title, duration, year, country, and category classification.
-* Track people involved in films (directors and actors) with the ability to distinguish between roles.
+* Track people involved in films (directors and actors).
 * Manage festival staff (judges and coordinators) with specialization tracking for judges.
 * Schedule film screenings with date, time, room, capacity, and coordinator assignment.
 * Record evaluations (scores) given by judges to films.
@@ -31,7 +31,6 @@ Email: [abohloolk@gmail.com](mailto:abohloolk@gmail.com)
 * No tracking of venue details beyond room names.
 * No financial transactions or budgeting.
 * No sponsor or partner management.
-* No detailed schedule conflict detection for rooms or coordinators.
 
 ## Representation
 
@@ -101,9 +100,6 @@ Festivals, films, people, staff, screenings, and evaluations are captured in SQL
 
 * **Judge-Evaluation (M:N with attributes)**: A judge evaluates multiple films, and a film is evaluated by multiple judges. The evaluation includes a `score` attribute. Implemented via `evaluation` table with composite primary key `(judge_id, film_id)`.
 
-* Foreign key constraints with CASCADE delete ensure referential integrity when parent records are removed.
-* Composite primary keys on junction tables prevent duplicate relationships.
-
 ## Optimizations
 
 * **Views for simplified data access**:
@@ -118,12 +114,9 @@ Festivals, films, people, staff, screenings, and evaluations are captured in SQL
 
 ## Limitations
 
-* **No detailed film metadata**: The system does not store synopses, trailers, languages, subtitles, production companies, or budget information.
+* **No detailed film metadata**: The system does not store trailers, languages, production companies, or budget information.
 * **No ticketing or attendance**: The database does not track ticket sales, audience numbers, or seat reservations for screenings.
 * **No venue management**: Beyond simple room names, there is no tracking of venue addresses, seating layouts, or equipment.
-* **No conflict detection for films**: While rooms and coordinators cannot be double-booked (enforced by UNIQUE constraints), the system does not prevent the same film from being screened simultaneously in different rooms.
 * **Limited staff roles**: Only judges and coordinators are represented; other staff roles (organizers, volunteers, technical crew) are not modeled.
 * **No awards or competition tracking**: The database stores scores but does not manage award categories, winners, or competition rules.
-* **Simplified person model**: Directors and actors are stored in the same `person` table, which works for this scope but limits the ability to store role-specific attributes (e.g., actor filmography details, director biography).
 * **No user authentication**: The database schema does not include user accounts or access control for festival staff using the system.
-* **SQLite-specific**: The schema uses SQLite-specific features (AUTOINCREMENT, TEXT dates) that may need adaptation for other database systems.
