@@ -8,6 +8,9 @@
     backgrounds,
 }
 
+\pgfdeclarelayer{connections}
+\pgfsetlayers{background,connections,main}
+
 \tikzset{
     entity/.style={
         rectangle,
@@ -50,7 +53,7 @@
     spec/.style={
         circle,
         draw=black!70,
-        fill=white,
+        fill=blue!5,
         text centered,
         minimum width=0.4,
         align=center,
@@ -58,7 +61,6 @@
     },
     cardinality/.style={
         font=\sffamily\footnotesize\bfseries,
-        fill=white,
         inner sep=1pt
     },
     connection/.style={
@@ -68,7 +70,8 @@
     doubleconnection/.style={
         draw=black!50,
         line width=0.7pt,
-        double distance=2pt
+        double distance=2pt,
+        double=black!10,
     },
 }
 
@@ -101,7 +104,7 @@
     \node[attribute, below left=6mm and 7mm of film] (filmtitle) {Title};
     \node[attribute, below=2pt of filmtitle] (filmdur) {Duration};
     \node[attribute, below=2pt of filmid] (filmyear) {Year};
-    \node[attribute, below=2pt of filmyear] (filmcountry) {Country};
+    \node[attribute, below=2pt of filmyear, xshift=-2pt] (filmcountry) {Country};
     \node[attribute, left=6mm of film] (eval_final) {Final\_Score};
 
     \node[entity, above=6cm of film] (person) {PERSON};
@@ -129,7 +132,7 @@
     \node[cardinality, above left=-1.5mm and 3mm of film_has] {1};
     \node[cardinality, above right=-1.5mm and 3mm of film_has] {N};
 
-    \node[spec, below=5cm of film_has] (staff_spec) {D};
+    \node[spec, below=4.5cm of film_has] (staff_spec) {D};
 
     \node[entity, below=7mm of staff_spec] (staff) {STAFF};
     \node[keyattribute, above left=-3.8mm and 5mm of staff] (sid) {\underline{ID}};
@@ -160,69 +163,75 @@
     \node[attribute, below left=6mm and 1cm of evaluates] (eval_score) {Score};
 
     % ===== DRAW ALL CONNECTIONS =====
-    \draw[connection] (festival) -- (fid);
-    \draw[connection] (festival) -- (ftitle);
-    \draw[connection] (festival) -- (fyear);
-    \draw[connection] (festival) -- (flocation);
-    \draw[doubleconnection] (festival) -- (fest_has);
-    \draw[connection] (fest_has) -- (category);
-    \draw[doubleconnection] (festival) -- (has_film);
-    \draw[connection] (has_film) -- (film);
+    \begin{pgfonlayer}{connections}
+        \draw[connection] (festival) -- (fid);
+        \draw[connection] (festival) -- (ftitle);
+        \draw[connection] (festival) -- (fyear);
+        \draw[connection] (festival) -- (flocation);
+        \draw[doubleconnection, shorten >=-1pt] (festival) -- (fest_has);
+        \draw[connection] (fest_has) -- (category);
+        \draw[doubleconnection, shorten >=-3pt] (festival) -- (has_film);
+        \draw[connection] (has_film) -- (film);
 
-    \draw[connection] (category) -- (cid);
-    \draw[connection] (category) -- (cname);
-    \draw[doubleconnection] (category) -- (belongs_to);
-    \draw[connection] (belongs_to) -- (film);
+        \draw[connection] (category) -- (cid);
+        \draw[connection] (category) -- (cname);
+        \draw[doubleconnection, shorten >=-5pt] (category) -- (belongs_to);
+        \draw[connection] (belongs_to) -- (film);
 
-    \draw[connection] (film) -- (filmid);
-    \draw[connection] (film) -- (filmtitle);
-    \draw[connection] (film) -- (filmdur);
-    \draw[connection] (film) -- (filmyear);
-    \draw[connection] (film) -- (filmcountry);
-    \draw[connection] (film) -- (eval_final);
+        \draw[connection] (film) -- (filmid);
+        \draw[connection] (film) -- (filmtitle);
+        \draw[connection] (film) -- (filmdur);
+        \draw[connection] (film) -- (filmyear);
+        \draw[connection] (film) -- (filmcountry);
+        \draw[connection] (film) -- (eval_final);
 
-    \draw[connection] (person) -- (pid);
-    \draw[connection] (person) -- (pname);
-    \draw[doubleconnection] (person) -- (person_spec);
-    \draw[connection] (person_spec) -- (director);
-    \draw[connection] (person_spec) -- (actor);
+        \draw[connection] (person) -- (pid);
+        \draw[connection] (person) -- (pname);
+        \draw[doubleconnection] (person) -- (person_spec);
+        \draw[connection] (person_spec) -- (director);
+        \draw[connection] (person_spec) -- (actor);
 
-    \draw[doubleconnection] (director) -- (directs);
-    \draw[connection] (directs.south) -- (film);
+        \draw[doubleconnection, shorten >=-1pt] (director) -- (directs);
+        \draw[connection] (directs) -- (film);
 
-    \draw[doubleconnection] (actor) -- (acts_in);
-    \draw[connection] (acts_in.south) -- (film);
+        \draw[doubleconnection, shorten >=-1pt] (actor) -- (acts_in);
+        \draw[connection] (acts_in) -- (film);
 
-    \draw[doubleconnection] (film) -- (film_has);
-    \draw[connection] (film_has) -- (screening);
+        \draw[doubleconnection, shorten >=-4pt] (film) -- (film_has);
+        \draw[connection] (film_has) -- (screening);
 
-    \draw[connection] (screening) -- (scid);
-    \draw[connection] (screening) -- (scdate);
-    \draw[connection] (screening) -- (sctime);
-    \draw[connection] (screening) -- (scroom);
-    \draw[connection] (screening) -- (sccap);
+        \draw[connection] (screening) -- (scid);
+        \draw[connection] (screening) -- (scdate);
+        \draw[connection] (screening) -- (sctime);
+        \draw[connection] (screening) -- (scroom);
+        \draw[connection] (screening) -- (sccap);
 
-    \draw[doubleconnection] (screening) -- (coordinates);
-    \draw[connection] (coordinates) -- (coordinator);
+        \draw[doubleconnection, shorten >=-1pt] (screening) -- (coordinates);
+        \draw[connection] (coordinates) -- (coordinator);
 
-    \draw[connection] (staff) -- (sid);
-    \draw[connection] (staff) -- (sname);
+        \draw[connection] (staff) -- (sid);
+        \draw[connection] (staff) -- (sname);
 
-    \draw[connection] (judge) -- (specialization);
-    \draw[connection] (judge) -- (staff_spec);
-    \draw[connection] (staff_spec) -- (coordinator);
-    \draw[doubleconnection] (staff_spec) -- (staff);
+        \draw[connection] (judge) -- (specialization);
+        \draw[connection] (judge) -- (staff_spec);
+        \draw[connection] (staff_spec) -- (coordinator);
+        \draw[doubleconnection] (staff_spec) -- (staff);
 
-    \draw[doubleconnection] (judge) -- (evaluates);
-    \draw[connection] (evaluates) -- (film);
-    \draw[connection] (evaluates) -- (eval_score);
+        \draw[doubleconnection, shorten >=-1pt] (judge) -- (evaluates);
+        \draw[connection] (evaluates) -- (film);
+        \draw[connection] (evaluates) -- (eval_score);
 
-    \draw[doubleconnection] (coordinator) -- (coordinates);
+        \draw[doubleconnection, shorten >=-1pt] (coordinator) -- (coordinates);
+    \end{pgfonlayer}
 
-    \node[left=0 of flocation] {};
-    \node[below=0 of sname] {};
-    \node[above=0 of pid] {};
-    \node[right=0 of sccap] {};
+    \node[left=0 of flocation] (w) {};
+    \node[below=0 of sname] (s) {};
+    \node[above=0 of pid] (n) {};
+    \node[right=0 of sccap] (e) {};
+
+    \begin{scope}[on background layer]
+        \node[fill=black!10, fit=(n) (e) (s) (w)] {};
+    \end{scope}
 
 \end{tikzpicture}
 \end{document}
