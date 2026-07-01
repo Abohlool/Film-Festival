@@ -16,48 +16,6 @@ class DBConnection:
     Attributes:
         db_path (str): Path to the SQLite database file
         schema_path (str): Path to the schema SQL file
-
-    Examples:
-        >>> # Basic initialization with default paths
-        >>> db = DBConnection()
-
-        >>> # Custom database and schema paths
-        >>> db = DBConnection(
-        ...     db_path="./database/festival.db",
-        ...     schema_path="./database/schema.sql"
-        ... )
-
-        >>> # Load sample data from file
-        >>> db.feed_sample(seed_path="./database/seed.sql")
-
-        >>> # Load sample data from string
-        >>> seed_sql = '''
-        ... INSERT INTO category (name) VALUES
-        ... ('Best Picture'),
-        ... ('Best Director');
-        ... '''
-        >>> db.feed_sample(seed=seed_sql)
-
-        >>> # Execute a query
-        >>> results = db.execute_query(
-        ...     "SELECT * FROM film WHERE year = ?",
-        ...     (2025,)
-        ... )
-
-        >>> # Get raw connection for complex operations
-        >>> conn = db.get_connection()
-        >>> cursor = conn.cursor()
-        >>> cursor.execute("SELECT COUNT(*) FROM person")
-        >>> cursor.close()
-        >>> conn.close()
-
-        >>> # Reset database during development
-        >>> db.reset_database()
-
-        >>> # Disable auto-initialization for manual control
-        >>> db = DBConnection(auto_init=False)
-        >>> # ... do something else ...
-        >>> db._init_schema()
     """
 
     def __init__(
@@ -83,13 +41,11 @@ class DBConnection:
     def _init_schema(self):
         """Create tables from schema file."""
         try:
-            with sqlite3.connect(self.db_path) as db:
-                cursor = db.cursor()
-                cursor.execute("PRAGMA foreign_keys = ON;")
+            with self.get_connection() as connection:
+                connection.execute("PRAGMA foreign_keys = ON;")
 
                 with open(self.schema_path, "r") as schema_file:
-                    schema_script = schema_file.read()
-                cursor.executescript(schema_script)
+                    connection.executescript(schema_file.read())
                 print(f"Schema initialized from {self.schema_path}")
         except FileNotFoundError:
             print(f"Warning: Schema file not found at {self.schema_path}")
@@ -108,18 +64,16 @@ class DBConnection:
             raise TypeError("Must provide at least one of (seed_path, seed)")
 
         try:
-            with sqlite3.connect(self.db_path) as db:
-                cursor = db.cursor()
-                cursor.execute("PRAGMA foreign_keys = ON;")
+            with self.get_connection() as connection:
+                connection.execute("PRAGMA foreign_keys = ON;")
 
                 if seed_path is not None:
                     with open(seed_path, "r") as seed_file:
-                        seed_script = seed_file.read()
-                    cursor.executescript(seed_script)
+                        connection.executescript(seed_file.read())
                     print(f"Sample data loaded from {seed_path}")
 
                 elif seed is not None:
-                    cursor.executescript(seed)
+                    connection.executescript(seed)
                     print("Sample data loaded from string")
 
         except FileNotFoundError:
@@ -127,18 +81,37 @@ class DBConnection:
         except Exception as e:
             print(f"Error feeding sample data: {e}")
 
-    def get_connection(self):
+    def get_connection(self) -> sqlite3.Connection:
         """Get a new database connection."""
         connection = sqlite3.connect(self.db_path)
         connection.execute("PRAGMA foreign_keys = ON;")
+        connection.row_factory = sqlite3.Row
         return connection
 
-    def execute_query(self, query: str, params: tuple = ()):
+    def execute(self, query: str, params: tuple = tuple()):
         """Execute a query and return results."""
-        with sqlite3.connect(self.db_path) as db:
-            cursor = db.cursor()
-            cursor.execute(query, params)
-            return cursor.fetchall()
+        with self.get_connection() as connection:
+            connection.execute(query, params)
+            connection.commit()
+
+    def fetchone(self, query: str, params: tuple = tuple()) -> sqlite3.Row | None:
+        with self.get_connection() as connection:
+            return connection.execute(query, params).fetchone()
+
+    def fetchall(self, query: str, params: tuple = tuple()) -> list[sqlite3.Row]:
+        with self.get_connection() as connection:
+            return connection.execute(query, params).fetchall()
+
+    def executemany(self, query: str, params: list[tuple] = [tuple()]):
+        with self.get_connection() as connection:
+            connection.executemany(query, params)
+            connection.commit()
+
+    def insert(self, query: str, params: tuple = tuple()) -> int:
+        with self.get_connection() as connection:
+            cursor = connection.execute(query, params)
+            connection.commit()
+            return cursor.lastrowid
 
     def reset_database(self):
         """Drop all tables and reinitialize schema."""
