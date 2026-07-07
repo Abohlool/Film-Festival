@@ -1,3 +1,4 @@
 docs/*.log
 docs/*.aux
 *.zip
+__pycache__
