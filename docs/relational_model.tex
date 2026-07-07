@@ -1,0 +1,318 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+
+\def\ojoin{%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[.45em]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+\begin{document}
+
+\title{Film Festival Database\\Relational Model and Relational Algebra}
+\author{}
+\date{}
+
+\maketitle
+
+\section{Relational Model}
+
+\vspace{5mm}
+\hspace{1cm}
+{\large
+$
+\begin{aligned}
+&\text{Festival}(\underline{\text{id}}, \text{title}, \text{year}, \text{location})\\[4pt]
+&\text{Category}(\underline{\text{id}}, \text{name})\\[4pt]
+&\text{Person}(\underline{\text{id}}, \text{name}, \text{type})\\[4pt]
+&\text{Staff}(\underline{\text{id}}, \text{name}, \text{type}, \text{specialization})\\[4pt]
+&\text{Film}(\underline{\text{id}}, \text{title}, \text{duration}, \text{year}, \text{country}, \text{category\_id}, \text{final\_score})\\[4pt]
+&\text{Screening}(\underline{\text{id}}, \text{date}, \text{time}, \text{room}, \text{capacity}, \text{film\_id}, \text{coordinator\_id})\\[4pt]
+&\text{FestivalCategory}(\underline{\text{festival\_id}}, \underline{\text{category\_id}})\\[4pt]
+&\text{FestivalFilm}(\underline{\text{festival\_id}}, \underline{\text{film\_id}})\\[4pt]
+&\text{FilmDirector}(\underline{\text{film\_id}}, \underline{\text{director\_id}})\\[4pt]
+&\text{FilmActor}(\underline{\text{film\_id}}, \underline{\text{actor\_id}})\\[4pt]
+&\text{Evaluation}(\underline{\text{judge\_id}}, \underline{\text{film\_id}}, \text{score})\\[8pt]
+&\text{Director} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'director'}}(\text{Person}))\\[4pt]
+&\text{Actor} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'actor'}}(\text{Person}))\\[4pt]
+&\text{Judge} = \pi_{\text{id},\ \text{name},\ \text{specialization}}(\sigma_{\text{type}=\text{'judge'}}(\text{Staff}))\\[4pt]
+&\text{Coordinator} = \pi_{\text{id},\ \text{name}}(\sigma_{\text{type}=\text{'coordinator'}}(\text{Staff}))
+\end{aligned}
+$
+}
+
+\newpage
+
+\section{Relational Algebra Queries}
+
+\begin{enumerate}
+
+\item Films in a specific festival
+$$
+\pi_{\text{Film.*}}
+\left(
+  \text{Film} 
+  \Join_{\text{Film.id} = 
+  \text{FestivalFilm.film\_id}}
+  \left(
+    \sigma_{\text{festival\_id} = x}
+    (\text{FestivalFilm})
+  \right)
+\right)
+$$
+
+\item Number of films in each category
+$$
+\text{id},\ \text{name}\ \Im_{\ \text{COUNT Film.id 
+AS film\_count}}
+\left(
+  \text{Category} 
+  \leftouterjoin_{\text{Category.id} = 
+  \text{Film.category\_id}} \text{Film}
+\right)
+$$
+
+\item Directors of a film
+$$
+\pi_{\text{name}}
+\left(
+  \text{Director} 
+  \Join_{\text{Director.id} = 
+  \text{FilmDirector.director\_id}}
+  \sigma_{\text{film\_id} = x}
+  (\text{FilmDirector})
+\right)
+$$
+
+\item Actors of a film
+$$
+\pi_{\text{name}}
+\left(
+  \text{Actor} 
+  \Join_{\text{Actor.id} = 
+  \text{FilmActor.actor\_id}}
+  \sigma_{\text{film\_id} = x}
+  (\text{FilmActor})
+\right)
+$$
+
+\item Future screenings of a film
+$$
+\begin{aligned}
+  \mathcal{T}_{\text{date, time}}
+  \Big(
+    \pi_{\text{title, time, date, room, capacity, name}}
+    \Big(
+      &\sigma_{\text{Film.id} = x\ 
+      \land\ 
+      \text{datetime} > 
+      \text{now}}
+      (\text{Screening})\\
+      &\Join_{\text{Screening.coordinator\_id} = 
+      \text{Staff.id}}
+      \text{Staff}\\
+      &\Join_{\text{Screening.film\_id} = 
+      \text{Film.id}}
+      \text{Film}
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Number of screenings for each film
+$$
+\begin{aligned}
+  \mathcal{T}_{\text{screening\_count DESC, title}}
+  \Big(
+    &\text{id},\ \text{title}\ 
+    \Im_{\ \text{COUNT Screening.id 
+    AS screening\_count}}
+    \Big(\\
+      &\text{Film} 
+      \leftouterjoin_{\text{Film.id} = 
+      \text{Screening.film\_id}} 
+      \text{Screening}
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Average score for each film
+$$
+\text{id},\ \text{title}\ 
+\Im_{\ \text{ROUND(AVERAGE score, 2) 
+AS average\_score}}
+\left(
+  \text{Film}
+  \Join_{\text{Film.id} = 
+  \text{Evaluation.film\_id}} 
+  \text{Evaluation}
+\right)
+$$
+
+\item Films ranked by average score
+$$
+\begin{aligned}
+  \mathcal{T}_{\text{average\_score DESC, title}}
+  \Big(
+    &\text{id},\ 
+    \text{title}\ 
+    \Im_{\ \text{ROUND(AVERAGE score, 2) 
+    AS average\_score}}
+    \Big(\\
+      &\text{Film}
+      \Join_{\text{Film.id} = 
+      \text{Evaluation.film\_id}}
+      \text{Evaluation}
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Films without evaluations
+$$
+\begin{aligned}
+  \pi_{\text{Film.id, Film.title}}
+  \Big(
+    &\sigma_{\text{Evaluation.film\_id IS NULL}}
+    \big(\\
+      &\text{Film}
+      \leftouterjoin_{\text{Film.id} = 
+      \text{Evaluation.film\_id}}
+      \text{Evaluation}
+    \big)
+  \Big)
+\end{aligned}
+$$
+
+\item Judges with more than five evaluations
+$$
+\begin{aligned}
+  \mathcal{T}_{\text{films\_evaluated DESC}}
+  \Big(
+    &\sigma_{\text{films\_evaluated} > 5}
+    \Big(
+      \text{id},\ \text{name},\ \text{specialization}\\
+      &\Im_{\ \text{COUNT film\_id 
+      AS films\_evaluated}}
+      \Big(
+        \text{Judge}\\
+        &\Join_{\text{Judge.id} = 
+        \text{Evaluation.judge\_id}}
+        \text{Evaluation}
+      \Big)
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Films with multiple directors
+$$
+  \begin{aligned}
+  \sigma_{\text{director\_count}>1}
+  \Big(
+    &\text{id},\ \text{title}\ 
+    \Im_{\ \text{COUNT DISTINCT director\_id 
+    AS director\_count}}
+    \Big(\\
+      &\text{Film}
+      \Join_{\text{Film.id} = 
+      \text{FilmDirector.film\_id}}
+      \text{FilmDirector}
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Actors appearing in more than two films
+$$
+\begin{aligned}
+  \sigma_{\text{film\_count}>2}
+  \Big(
+    &\text{id},\ \text{name}\ 
+    \Im_{\ \text{COUNT actor\_id 
+    AS film\_count}}
+    \Big(\\
+      &\text{Actor}
+      \Join_{\text{Actor.id} = 
+      \text{FilmActor.actor\_id}}
+      \text{FilmActor}
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Screenings on a specific date
+$$
+\begin{aligned}
+  \pi_{\text{title, time, room, capacity, name}}
+  \Big(
+    &\sigma_{\text{date} = x}
+    (\text{Screening})\\
+    &\Join_{\text{Screening.coordinator\_id} = 
+    \text{Staff.id}}
+    \text{Staff}\\
+    &\Join_{\text{Screening.film\_id} =
+    \text{Film.id}}
+    \text{Film}
+  \Big)
+\end{aligned}
+$$
+
+\item Number of screenings in each room on a specific date
+$$
+\text{room}\ 
+\Im_{\ \text{COUNT * 
+AS screening\_count}}
+\left(
+  \sigma_{\text{date} = x}
+  (\text{Screening})
+\right)
+$$
+
+\item Judges without evaluations
+$$
+\begin{aligned}
+  \mathcal{T}_{\text{name}}
+  \Big(
+    \pi_{\text{Judge.id, Judge.name, Judge.specialization}}
+    \Big(
+      &\sigma_{\text{Evaluation.judge\_id 
+      IS NULL}}
+      \big(
+        \text{Judge}\\
+        &\leftouterjoin_{\text{Judge.id} = 
+        \text{Evaluation.judge\_id}}
+        \text{Evaluation}
+      \big)
+    \Big)
+  \Big)
+\end{aligned}
+$$
+
+\item Films without screenings
+$$
+\begin{aligned}
+  \pi_{\text{Film.id, Film.title}}
+  \Big(
+    &\sigma_{\text{Screening.film\_id 
+    IS NULL}}
+    \big(\\
+      &\text{Film}
+      \leftouterjoin_{\text{Film.id} =
+      \text{Screening.film\_id}}
+      \text{Screening}
+    \big)
+  \Big)
+\end{aligned}
+$$
+
+\end{enumerate}
+
+\end{document}
