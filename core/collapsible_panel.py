@@ -70,7 +70,7 @@ class CollapsiblePanel(QWidget):
     def expand(self):
         if self.is_collapsed:
             self.animation.setStartValue(0)
-            self.animation.setEndValue(self.content_height if self.content_height > 0 else 500)
+            self.animation.setEndValue(700)
             self.animation.start()
             self.toggle_button.setText("◀")
             self.is_collapsed = False
