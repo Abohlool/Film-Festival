@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QTableView, QHeaderView, QMessageBox,
     QInputDialog, QLabel, QStatusBar, QPushButton,
     QTreeWidget, QTreeWidgetItem,
-    QDialog,
+    QDialog, QTextEdit, QGroupBox
 )
 
 from PySide6.QtCore import Qt
@@ -105,11 +105,41 @@ class MainWindow(QMainWindow):
         
         self.right_panel = CollapsiblePanel("Queries")
         self.right_panel.setMinimumWidth(250)
-        self.right_panel.setMaximumWidth(400)
+        self.right_panel.setMaximumWidth(500)
         
+        predefined_group = QGroupBox()
+        predefined_layout = QVBoxLayout(predefined_group)
         self.query_list = QListWidget()
         self.query_list.itemClicked.connect(self.execute_query)
-        self.right_panel.add_widget(self.query_list)
+        predefined_layout.addWidget(self.query_list)
+        self.right_panel.add_widget(predefined_group)
+        
+        custom_group = QGroupBox("Custom Query")
+        custom_layout = QVBoxLayout(custom_group)
+        
+        self.custom_query_input = QTextEdit()
+        self.custom_query_input.setPlaceholderText("Enter your SQL query here...")
+        self.custom_query_input.setMaximumHeight(200)
+        self.custom_query_input.setFont(QFont("Courier New", 9))
+        custom_layout.addWidget(self.custom_query_input)
+        
+        custom_button_layout = QHBoxLayout()
+        
+        self.run_custom_button = QPushButton("▶ Run")
+        self.run_custom_button.setFont(QFont("Arial", 9))
+        self.run_custom_button.clicked.connect(self.execute_custom_query)
+        
+        self.clear_custom_button = QPushButton("🗑 Clear")
+        self.clear_custom_button.setFont(QFont("Arial", 9))
+        self.clear_custom_button.clicked.connect(self.clear_custom_query)
+        
+        custom_button_layout.addWidget(self.run_custom_button)
+        custom_button_layout.addWidget(self.clear_custom_button)
+        custom_button_layout.addStretch()
+        
+        custom_layout.addLayout(custom_button_layout)
+        
+        self.right_panel.add_widget(custom_group)
         
         main_splitter.addWidget(left_panel)
         main_splitter.addWidget(center_panel)
@@ -529,4 +559,66 @@ class MainWindow(QMainWindow):
                 f"An unexpected error occurred:\n{str(e)}"
             )
             self.status_bar.showMessage("Query failed")
+    
+    
+    def execute_custom_query(self):
+        query = self.custom_query_input.toPlainText().strip()
+        
+        if not query:
+            QMessageBox.warning(
+                self, 
+                "Empty Query", 
+                "Please enter a SQL query to execute."
+            )
+            return
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute(query)
+            data = cursor.fetchall()
+            headers = [description[0] for description in cursor.description]
+            
+            if not hasattr(self, 'table_model'):
+                self.table_model = TableModel(data, headers)
+                self.table_view.setModel(self.table_model)
+            else:
+                self.table_model.update_data(data, headers)
+            
+            self.results_label.setText(f"Custom Query - {len(data)} results")
+            self.status_bar.showMessage(
+                f"Custom query executed successfully - {len(data)} rows returned"
+            )
+            
+            self.current_table = None
+            self.add_button.setEnabled(False)
+            self.edit_button.setEnabled(False)
+            self.delete_button.setEnabled(False)
+            self.refresh_button.setEnabled(False)
+            
+            if self.right_panel.is_collapsed:
+                self.right_panel.expand()
+            
+            cursor.close()
+            conn.close()
+            
+        except sqlite3.Error as e:
+            QMessageBox.critical(
+                self, 
+                "Database Error", 
+                f"Error executing custom query:\n{str(e)}"
+            )
+            self.status_bar.showMessage("Custom query failed")
+        except Exception as e:
+            QMessageBox.critical(
+                self, 
+                "Error", 
+                f"An unexpected error occurred:\n{str(e)}"
+            )
+            self.status_bar.showMessage("Custom query failed")
+    
+    
+    def clear_custom_query(self):
+        self.custom_query_input.clear()
     
