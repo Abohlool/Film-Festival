@@ -1,0 +1,100 @@
+{
+  "queries": [
+    {
+      "name": "🎬 Films in a specific festival",
+      "query": "SELECT f.*\nFROM film AS f\nJOIN festival_film AS ff ON ff.film_id = f.id\nWHERE ff.festival_id = ?",
+      "params_prompt": "Enter Festival ID:",
+      "params_type": "int"
+    },
+    {
+      "name": "📊 Number of films per category",
+      "query": "SELECT c.id, c.name, COUNT(f.id) AS 'film_count'\nFROM category AS c\nLEFT JOIN film AS f ON c.id = f.category_id\nGROUP BY c.id, c.name",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "👨‍💼 Directors of a film",
+      "query": "SELECT d.name AS 'director'\nFROM director AS d\nJOIN film_director AS fd ON fd.director_id = d.id\nWHERE fd.film_id = ?",
+      "params_prompt": "Enter Film ID:",
+      "params_type": "int"
+    },
+    {
+      "name": "🎭 Actors of a film",
+      "query": "SELECT a.name AS 'actor'\nFROM actor AS a\nJOIN film_actor AS fa ON a.id = fa.actor_id\nWHERE fa.film_id = ?",
+      "params_prompt": "Enter Film ID:",
+      "params_type": "int"
+    },
+    {
+      "name": "📅 Future screenings of a film",
+      "query": "SELECT f.title, sc.time, sc.date, sc.room, sc.capacity, s.name\nFROM film AS f\nJOIN screening AS sc ON f.id = sc.film_id\nJOIN staff AS s ON s.id = sc.coordinator_id\nWHERE f.id = ?\nAND datetime(sc.date || ' ' || sc.time) > datetime('now')\nORDER BY sc.date, sc.time",
+      "params_prompt": "Enter Film ID:",
+      "params_type": "int"
+    },
+    {
+      "name": "🎥 Number of screenings per film",
+      "query": "SELECT f.id, f.title, COUNT(sc.id) AS 'screening_count'\nFROM film AS f\nLEFT JOIN screening AS sc ON sc.film_id = f.id\nGROUP BY f.id, f.title\nORDER BY screening_count DESC, f.title",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "⭐ Average score for each film",
+      "query": "SELECT f.id, f.title, ROUND(AVG(e.score), 2) AS 'average_score'\nFROM film AS f\nJOIN evaluation AS e ON e.film_id = f.id\nGROUP BY f.id, f.title",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "🏆 Films ranked by average score",
+      "query": "SELECT f.id, f.title, ROUND(AVG(e.score), 2) AS 'average_score'\nFROM film AS f\nJOIN evaluation AS e ON e.film_id = f.id\nGROUP BY f.id, f.title\nORDER BY average_score DESC, f.title",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "❌ Films without evaluations",
+      "query": "SELECT f.id, f.title\nFROM film AS f\nLEFT JOIN evaluation AS e ON e.film_id = f.id\nWHERE e.film_id IS NULL",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "👨‍⚖️ Judges evaluating over five films",
+      "query": "SELECT j.id, j.name, j.specialization, COUNT(e.film_id) AS 'films_evaluated'\nFROM judge AS j\nJOIN evaluation AS e ON j.id = e.judge_id\nGROUP BY j.id, j.name, j.specialization\nHAVING COUNT(e.film_id) > 5\nORDER BY films_evaluated DESC",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "👥 Films with multiple directors",
+      "query": "SELECT f.id, f.title, COUNT(fd.director_id) AS 'director_count'\nFROM film AS f\nJOIN film_director AS fd ON f.id = fd.film_id\nGROUP BY f.id, f.title\nHAVING COUNT(DISTINCT fd.director_id) > 1",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "🌟 Actors in more than two films",
+      "query": "SELECT a.id, a.name, COUNT(fa.actor_id) AS 'film_count'\nFROM actor AS a\nJOIN film_actor AS fa ON a.id = fa.actor_id\nGROUP BY a.id, a.name\nHAVING COUNT(fa.actor_id) > 2",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "📆 Screenings on specific date",
+      "query": "SELECT f.title, sc.time, sc.room, sc.capacity, s.name\nFROM film AS f\nJOIN screening AS sc ON f.id = sc.film_id\nJOIN staff AS s ON s.id = sc.coordinator_id\nWHERE sc.date = ?\nORDER BY sc.time",
+      "params_prompt": "Enter Date (YYYY-MM-DD):",
+      "params_type": "str"
+    },
+    {
+      "name": "🏢 Screenings per room by date",
+      "query": "SELECT sc.room, COUNT(*) AS 'screening_count'\nFROM screening AS sc\nWHERE sc.date = ?\nGROUP BY sc.room",
+      "params_prompt": "Enter Date (YYYY-MM-DD):",
+      "params_type": "str"
+    },
+    {
+      "name": "⚖️ Judges without evaluations",
+      "query": "SELECT j.id, j.name, j.specialization\nFROM judge AS j\nLEFT JOIN evaluation AS e ON j.id = e.judge_id\nWHERE e.judge_id IS NULL\nORDER BY j.name",
+      "params_prompt": null,
+      "params_type": null
+    },
+    {
+      "name": "🎞️ Films without screenings",
+      "query": "SELECT f.id, f.title\nFROM film AS f\nLEFT JOIN screening AS sc ON sc.film_id = f.id\nWHERE sc.film_id IS NULL",
+      "params_prompt": null,
+      "params_type": null
+    }
+  ]
+}
